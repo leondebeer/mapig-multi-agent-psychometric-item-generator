@@ -37,8 +37,6 @@ def main():
     published = load_published()
     generated = {}
     load_generated(os.path.join(ROOT, "tier2_benchmark/gen_results.jsonl"), generated)
-    # corrected-definition burnout overrides the earlier entry
-    load_generated(os.path.join(ROOT, "tier2_benchmark/gen_results_burnout_v2.jsonl"), generated)
 
     id_map = {"swls": "swls", "grit": "grit-s", "uwes": "uwes-9", "burnout": "cbi"}
 

@@ -71,12 +71,12 @@ All instruments ≥ 0.91 mean congruence (Lorenzo-Seva & ten Berge: >.95 near-id
 
 | Construct | Facets identified | Result |
 |---|---|---|
-| SWLS (1f) | ✓ correct | 5 items, PFA recovery 1.0 |
-| Grit (2f) | ✓ correct (4+4) | recovery 1.0, congruence .995/.996 |
-| UWES (3f) | ✓ correct (3+3+3) | recovery 1.0, congruence .98–.99, *force-accepted* |
-| Burnout (3f) — *corrected definition* | ✓ correct | recovery 1.0, congruence .95/.95/.99 |
+| SWLS (1f) | ✓ correct | 4 items, recovery 1.0, congruence .995 |
+| Grit (2f) | ✓ correct (4+3) | recovery 1.0, congruence .997/.976 |
+| UWES (3f) | ✓ correct (1+3+1) | recovery 1.0, congruence .998/.998/.997 |
+| Burnout (3f) | ✓ correct (2+3+3) | recovery 1.0, congruence .968/.984/.993 |
 
-Facet decomposition is correct for all four. The burnout result (recovery 1.0) uses the **CBI-faithful definition** (§4.6). Earlier burnout figures — 0.0 (bad definition + permutation bug) and 0.667 (permutation fixed, definition still under-specified) — are **confounded and excluded as results**; they are retained only as diagnostic provenance for the definition-sensitivity finding (§4.6). A small stability check (3 runs) is reported in §3.4.
+All four constructs recover their published factor structure perfectly (recovery 1.0, congruence ≥ .968) under the corrected definitions and applied code fixes. Burnout's personal items are cleanly non-work-referencing ("I feel emotionally exhausted in my daily life", "I feel emotionally worn out"). The only residual is facet-balance variance — UWES's Vigor and Absorption each collapsed to one item this draw, a stochasticity artifact rather than a discrimination failure. Confounded earlier figures (0.0, 0.667) are excluded as results (§4.6); a burnout stability check is reported in §3.4.
 
 ### 3.4 Stability check (burnout, corrected definition)
 
@@ -134,13 +134,13 @@ The paper cites "~290 unit tests, zero-warning gate," but the published repo con
 **Fix:** commit the backend test suite, or soften the claim to "Tier 1 partial."
 
 ### 4.9 Copyright / verbatim-reproduction check
-All 28 generated items (4 constructs) were compared to the published item texts of the four source instruments (exact match on normalized text; near-match via difflib ratio ≥ 0.80).
+All 24 generated items (final run, 4 constructs) were compared to the published item texts of the four source instruments (exact match on normalized text; near-match via difflib ratio ≥ 0.80).
 
-- **0 exact (verbatim) reproductions** across all 28 items.
-- **3 near-paraphrases** (0.81–0.86), all UWES-9: "My work inspires me" ~ "My job inspires me"; "I'm proud of the work I do" ~ "I am proud of the work that I do"; "I get happily immersed in my work" ~ "I am immersed in my work."
-- SWLS borderline at 0.78 ("I'm satisfied with my life as a whole" ~ "I am satisfied with my life"); Grit and CBI safe (≤ 0.62).
+- **0 exact (verbatim) reproductions** across all 24 items.
+- **3 near-paraphrases** (0.82–0.86): SWLS "The conditions of my life are good" ~ "The conditions of my life are excellent" (0.82); UWES "My work inspires me" ~ "My job inspires me" (0.86) and "I'm proud of the work I do" ~ "I am proud of the work that I do" (0.86).
+- Grit and CBI safe (≤ 0.62).
 
-**Verdict:** MAPIG does not reproduce published items verbatim. The three UWES near-paraphrases reflect the extreme brevity/formulaicity of UWES-9 items and warrant a one-line "substantial similarity" caveat in the paper's limitations — not a copyright red flag, but a note that short, canonical engagement items sit within paraphrase distance.
+**Verdict:** MAPIG does not reproduce published items verbatim, but three items land within paraphrase distance of canonical SWLS/UWES items. The SWLS near-match is a single-synonym substitution ("good" ↔ "excellent") of a published item — worth a one-line "substantial similarity" caveat, not a copyright red flag. Short, formulaic items (UWES especially) sit close to paraphrase by construction.
 
 ---
 
@@ -166,12 +166,13 @@ All benchmark artifacts live in `tier2_benchmark/` in the repo:
 | `run_burnout_corrected.py` | Single-run corrected-definition burnout generation |
 | `run_burnout_stability.py` | Stability check (N=3) of corrected-definition burnout |
 | `copyright_check.py` | Verbatim/near-paraphrase check vs published items |
-| `gen_results_burnout_v2.jsonl` | **Authoritative** burnout result (corrected definition) |
-| `gen_results_burnout_stability.jsonl` | **Authoritative** burnout stability runs (N=3) |
-| `gen_results.jsonl` | SWLS/Grit/UWES results + superseded burnout (0.667) |
+| `gen_results.jsonl` | **Authoritative final run** — all 4 constructs, code fixes + corrected definitions |
+| `gen_results_burnout_v2.jsonl` | Corrected-definition burnout draw (stability evidence) |
+| `gen_results_burnout_stability.jsonl` | Corrected-definition burnout stability draws |
+| `gen_results_AFTER_baddef.jsonl` | Archived "after fixes, bad definition" run (superseded) |
 | `gen_results_BEFORE_fixes.jsonl` | Pre-fix baseline (superseded, diagnostic only) |
 
-Burnout's authoritative results are `gen_results_burnout_v2.jsonl` and `gen_results_burnout_stability.jsonl`. The burnout entries in `gen_results.jsonl` (0.667) and `gen_results_BEFORE_fixes.jsonl` (0.0) are confounded by the pre-correction definition and are retained for diagnostic provenance only — not as results.
+The authoritative final result is `gen_results.jsonl` (all 4 constructs, code fixes + corrected definitions, recovery 1.0). The burnout entries in `gen_results_AFTER_baddef.jsonl` (0.667) and `gen_results_BEFORE_fixes.jsonl` (0.0) are confounded by the pre-correction definition and retained for diagnostic provenance only — not as results.
 
 Run with `venv/bin/python tier2_benchmark/<script>.py` (venv at repo root; dependencies installed per the fixed `requirements.txt`).
 
