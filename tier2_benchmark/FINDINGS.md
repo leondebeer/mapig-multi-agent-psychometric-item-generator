@@ -76,7 +76,7 @@ All instruments ≥ 0.91 mean congruence (Lorenzo-Seva & ten Berge: >.95 near-id
 | UWES (3f) | ✓ correct (3+3+3) | recovery 1.0, congruence .98–.99, *force-accepted* |
 | Burnout (3f) — *corrected definition* | ✓ correct | recovery 1.0, congruence .95/.95/.99 |
 
-Facet decomposition is correct for all four. Burnout progressed across three runs as its two confounds were removed: **0.0** (bad definition + permutation bug) → **0.667** (code fixes only, definition still under-specified) → **1.0** (CBI-faithful definition, §4.6). The binding constraint on burnout was *construct-definition specificity*, not facet overlap per se. A small stability check (3 runs) is reported in §3.4.
+Facet decomposition is correct for all four. The burnout result (recovery 1.0) uses the **CBI-faithful definition** (§4.6). Earlier burnout figures — 0.0 (bad definition + permutation bug) and 0.667 (permutation fixed, definition still under-specified) — are **confounded and excluded as results**; they are retained only as diagnostic provenance for the definition-sensitivity finding (§4.6). A small stability check (3 runs) is reported in §3.4.
 
 ### 3.4 Stability check (burnout, corrected definition)
 
@@ -117,7 +117,7 @@ The pipeline emitted the literal duplicate `"I'm satisfied with my job."` twice 
 ### 4.6 Definition-sensitivity *(revised — not a simple discriminant failure)*
 The initial burnout run reported recovery 0.0 with cross-contaminated "personal burnout" items that still referenced work (e.g. "I feel worn out from my *work* and daily responsibilities"). This was **substantially an evaluation artifact**: the harness's burnout definition ("generalized fatigue of the person") did not exclude work attribution, and its framing ("exhaustion experienced in relation to work") wrongly implied personal burnout is work-bound. CBI (Kristensen et al. 2005) defines personal burnout as exhaustion *not* attributed to work, work-related as "perceived as related to the person's work," and client-related as "perceived as related to the person's work with clients."
 
-Re-running with the CBI-faithful definition: **recovery 0.667 → 1.0**, congruence [0.95, 0.95, 0.99], and personal items are clean — "I feel drained most days," "I feel emotionally exhausted most of the time" (no work reference).
+Re-running with the CBI-faithful definition yields **recovery 1.0**, congruence [0.95, 0.95, 0.99] (stable × 3, §3.4), and personal items are clean — "I feel drained most days," "I feel emotionally exhausted most of the time" (no work reference). The earlier 0.0 and 0.667 figures are **not valid burnout results** — both reflect the under-specified definition (0.0 additionally reflects the permutation bug) — and serve only as diagnostic evidence that definition specificity is the binding constraint.
 
 Residual: the work-related facet is under-populated (1 item) in the corrected run — a facet-*balance* issue, not a discrimination failure (recovery is still 1.0).
 
@@ -163,6 +163,15 @@ All benchmark artifacts live in `tier2_benchmark/` in the repo:
 | `run_tier2.py` | Factor-recovery benchmark (PFA + Hungarian factor alignment) |
 | `run_tier2_published.py` | Tucker congruence vs published loadings (NaN-aware) |
 | `run_generation.py` | Full-pipeline generation on the 4 construct definitions |
+| `run_burnout_corrected.py` | Single-run corrected-definition burnout generation |
+| `run_burnout_stability.py` | Stability check (N=3) of corrected-definition burnout |
+| `copyright_check.py` | Verbatim/near-paraphrase check vs published items |
+| `gen_results_burnout_v2.jsonl` | **Authoritative** burnout result (corrected definition) |
+| `gen_results_burnout_stability.jsonl` | **Authoritative** burnout stability runs (N=3) |
+| `gen_results.jsonl` | SWLS/Grit/UWES results + superseded burnout (0.667) |
+| `gen_results_BEFORE_fixes.jsonl` | Pre-fix baseline (superseded, diagnostic only) |
+
+Burnout's authoritative results are `gen_results_burnout_v2.jsonl` and `gen_results_burnout_stability.jsonl`. The burnout entries in `gen_results.jsonl` (0.667) and `gen_results_BEFORE_fixes.jsonl` (0.0) are confounded by the pre-correction definition and are retained for diagnostic provenance only — not as results.
 
 Run with `venv/bin/python tier2_benchmark/<script>.py` (venv at repo root; dependencies installed per the fixed `requirements.txt`).
 
