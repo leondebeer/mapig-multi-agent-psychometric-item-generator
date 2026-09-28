@@ -29,7 +29,7 @@ CONSTRUCTS = [
     {
         "id": "burnout", "name": "Burnout", "item_count": 9, "is_unidimensional": False,
         "population": "Human-service and client-facing workers", "scale": "5-point frequency",
-        "definition": "A state of prolonged physical and psychological exhaustion experienced in relation to work, comprising three facets: (1) Personal burnout, generalized fatigue and exhaustion of the person; (2) Work-related burnout, fatigue and exhaustion attributed to the demands of one's work; and (3) Client-related burnout, fatigue and exhaustion attributed to working with clients, customers, or service recipients.",
+        "definition": "A state of prolonged physical and psychological exhaustion, comprising three facets: (1) Personal burnout, physical and psychological exhaustion experienced by the person generally, regardless of and not attributed to their work; (2) Work-related burnout, exhaustion that is perceived as related to the person's work; and (3) Client-related burnout, exhaustion that is perceived as related to the person's work with clients.",
     },
 ]
 

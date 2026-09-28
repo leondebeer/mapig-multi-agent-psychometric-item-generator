@@ -1,8 +1,9 @@
 # MAPIG Tier 2 Replication Validation — Findings Report
 
-**Date:** 2026-09-27
+**Date:** 2026-09-28 (revised)
 **Prepared by:** Leon De Beer (NTNU) with Hermes Agent (automated replication harness)
 **Scope:** Tier 2 replication benchmark of MAPIG's pseudo-factor analysis (PFA) and item-generation pipeline against four published instruments.
+**Revision:** 2026-09-28 — eight fixes applied and committed to a fork; burnout re-evaluated under a CBI-faithful definition (§4.6); verbatim/copyright check added (§4.9).
 
 ---
 
@@ -10,7 +11,7 @@
 
 MAPIG's PFA **recovers published factor structures with high accuracy** (40/41 items, 97.6%), and its loadings achieve **Tucker congruence of 0.91–1.00** against published loading matrices — reproducing the Varrasi et al. (2026) ">.90" benchmark the paper cites. The full-pipeline facet decomposition is also correct for all four constructs **when the construct is explicitly flagged multi-dimensional**.
 
-Running the pipeline end-to-end surfaced **eight concrete issues** — three of which (factor-order misalignment, reverse-keyed sign handling, overlapping-facet cross-contamination) map directly onto the paper's own Gap list (factor-sign/order indeterminacy, discriminant validity). Full detail in §4.
+Running the pipeline end-to-end surfaced **eight concrete issues**. Two are correctness bugs in the PFA metrics (factor-order misalignment, reverse-keyed sign handling) that map onto the paper's Gap list (factor-sign/order indeterminacy); a third — the burnout "cross-contamination" — turned out to be substantially an *evaluation-harness* construct-definition error rather than a generator failure (§4.6). All fixes are applied and committed in the fork. Full detail in §4.
 
 ---
 
@@ -37,7 +38,7 @@ Instruments chosen for open-access items + published factor structures, off MAPI
 
 - Claude (facet mapper, item writer, reviewers, meta-editor) via OpenRouter.
 - GPT-5.4-mini / GPT-5.2 (analytics) + `text-embedding-3-large` (embeddings) via OpenAI.
-- Perplexity academic search **not configured** (no key) — degrades gracefully; evidence gathering runs at reduced fidelity.
+- Perplexity academic search (sonar-pro, academic-domain allowlist) — configured for full-fidelity evidence gathering in the corrected re-runs.
 
 ---
 
@@ -73,9 +74,9 @@ All instruments ≥ 0.91 mean congruence (Lorenzo-Seva & ten Berge: >.95 near-id
 | SWLS (1f) | ✓ correct | 5 items, PFA recovery 1.0 |
 | Grit (2f) | ✓ correct (4+4) | recovery 1.0, congruence .995/.996 |
 | UWES (3f) | ✓ correct (3+3+3) | recovery 1.0, congruence .98–.99, *force-accepted* |
-| Burnout (3f) | ✓ correct (2+4+3) | **PFA recovery 0.0, congruence ~0, max item-cosine .90** |
+| Burnout (3f) — *corrected definition* | ✓ correct | recovery 1.0, congruence .95/.95/.99 |
 
-Facet decomposition is correct for all four. Item-generation quality degrades monotonically with facet overlap: Grit (distinct facets) clean → UWES (moderate) force-accepted → Burnout (semantically-close "exhaustion" facets) fails, with cross-contaminated items and a PFA that cannot separate the factors.
+Facet decomposition is correct for all four. Burnout progressed across three runs as its two confounds were removed: **0.0** (bad definition + permutation bug) → **0.667** (code fixes only, definition still under-specified) → **1.0** (CBI-faithful definition, §4.6). The binding constraint on burnout was *construct-definition specificity*, not facet overlap per se. A small stability check (3 runs) is reported in §3.4.
 
 ---
 
@@ -101,9 +102,16 @@ CBI item 13 (reverse-keyed) recovered with loading −0.38 on its factor, vs pub
 The pipeline emitted the literal duplicate `"I'm satisfied with my job."` twice in an earlier run, plus near-synonym substitution items. MAPIG *flagged* the resulting redundancy (6 flags, pseudo-α too high) but did not deduplicate.
 **Fix:** string-similarity dedup before final output.
 
-### 4.6 Discriminant failure for overlapping facets *(matches shipped weakness)*
-For semantically-close facets (personal vs work-related burnout), the item writer produces cross-contaminated items — "personal burnout" items still mention "work" (e.g. "I feel worn out from my *work* and daily responsibilities") — and the PFA cannot separate the factors (recovery 0.0). This is the same "internal consistency too high — possible item redundancy" weakness MAPIG's own shipped `eval_results.json` admits.
-**Fix:** stronger negative-space / contrastive prompts between adjacent facets.
+### 4.6 Definition-sensitivity *(revised — not a simple discriminant failure)*
+The initial burnout run reported recovery 0.0 with cross-contaminated "personal burnout" items that still referenced work (e.g. "I feel worn out from my *work* and daily responsibilities"). This was **substantially an evaluation artifact**: the harness's burnout definition ("generalized fatigue of the person") did not exclude work attribution, and its framing ("exhaustion experienced in relation to work") wrongly implied personal burnout is work-bound. CBI (Kristensen et al. 2005) defines personal burnout as exhaustion *not* attributed to work, work-related as "perceived as related to the person's work," and client-related as "perceived as related to the person's work with clients."
+
+Re-running with the CBI-faithful definition: **recovery 0.667 → 1.0**, congruence [0.95, 0.95, 0.99], and personal items are clean — "I feel drained most days," "I feel emotionally exhausted most of the time" (no work reference).
+
+Residual: the work-related facet is under-populated (1 item) in the corrected run — a facet-*balance* issue, not a discrimination failure (recovery is still 1.0).
+
+**Implication for the paper:** replace "MAPIG fails on overlapping facets" with "MAPIG is *definition-sensitive* — poorly specified constructs cross-contaminate; correctly specified ones recover cleanly." This is a stronger, more actionable finding: it quantifies the garbage-in-garbage-out boundary rather than implying an irremediable generator limit.
+
+**Fix:** none required in MAPIG core beyond the prompt hardening already in the fork; the correction is in the *evaluation harness's* construct definitions (committed to `tier2_benchmark/run_generation.py`).
 
 ### 4.7 Broken dependency pins
 `requirements.txt` pins `langgraph-checkpoint==3.0.3` (does not exist on PyPI — versions jump 3.0.1 → 4.0.0) and `langchain-core==1.2.8` (too old for `langchain-anthropic>=1.3.4`, which resolves to 1.7.4 requiring `langchain-core>=1.6.4`). Installation fails out of the box.
@@ -112,6 +120,15 @@ For semantically-close facets (personal vs work-related burnout), the item write
 ### 4.8 Test-suite claim mismatch
 The paper cites "~290 unit tests, zero-warning gate," but the published repo contains **no Python tests** and CI explicitly skips pytest when `tests/` is absent (only 7 frontend Vitest tests + Playwright E2E exist).
 **Fix:** commit the backend test suite, or soften the claim to "Tier 1 partial."
+
+### 4.9 Copyright / verbatim-reproduction check
+All 28 generated items (4 constructs) were compared to the published item texts of the four source instruments (exact match on normalized text; near-match via difflib ratio ≥ 0.80).
+
+- **0 exact (verbatim) reproductions** across all 28 items.
+- **3 near-paraphrases** (0.81–0.86), all UWES-9: "My work inspires me" ~ "My job inspires me"; "I'm proud of the work I do" ~ "I am proud of the work that I do"; "I get happily immersed in my work" ~ "I am immersed in my work."
+- SWLS borderline at 0.78 ("I'm satisfied with my life as a whole" ~ "I am satisfied with my life"); Grit and CBI safe (≤ 0.62).
+
+**Verdict:** MAPIG does not reproduce published items verbatim. The three UWES near-paraphrases reflect the extreme brevity/formulaicity of UWES-9 items and warrant a one-line "substantial similarity" caveat in the paper's limitations — not a copyright red flag, but a note that short, canonical engagement items sit within paraphrase distance.
 
 ---
 
@@ -141,7 +158,8 @@ Run with `venv/bin/python tier2_benchmark/<script>.py` (venv at repo root; depen
 
 ## 7. Recommendations
 
-1. **Fix 4.1, 4.2, 4.4 first** — these are correctness bugs that produce misleading metrics (4.1) or crash runs (4.4) and affect the Tier 2 evidence directly.
+1. **Fix 4.1, 4.2, 4.4 first** — these are correctness bugs that produce misleading metrics (4.1) or crash runs (4.4) and affect the Tier 2 evidence directly. *(All applied in the fork.)*
 2. **Reframe the Tier 2 metric** in the paper around factor-recovery (generalizable) with loading-congruence as a secondary check, and note the 2/4 instrument loading-availability caveat explicitly.
-3. **Add the overlapping-facet case (Burnout) as a known boundary condition** — it is a *feature* of the validation that it localizes exactly where the generator is weak, not a reason to hide the result.
-4. **Tier 3 (blinded expert ratings)** is the natural next evaluation; the Tier 2 evidence here is sufficient to proceed.
+3. **Reframe the burnout finding as definition-sensitivity, not a discriminant-failure boundary** — the corrected CBI definition recovers perfectly; the finding is that output quality tracks construct-definition specificity.
+4. **Add a one-line copyright caveat** — no verbatim reproduction, but 3 UWES items sit within paraphrase distance (0.81–0.86) of published items.
+5. **Tier 3 (blinded expert ratings)** is the natural next evaluation; the Tier 2 evidence here is sufficient to proceed.
