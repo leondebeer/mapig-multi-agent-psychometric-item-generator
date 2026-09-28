@@ -61,11 +61,14 @@ class UserRequest(BaseModel):
     )
 
     min_items_per_facet: conint(ge=1, le=10) = Field(
-        default=1,
+        default=3,
         description=(
-            "Floor the PFA pruner never takes a facet below (multi-dimensional constructs). "
-            "When facets times this floor exceeds item_count, the floor wins and more items "
-            "than item_count are returned."
+            "Minimum items a facet must retain (multi-dimensional constructs). "
+            "3 is the just-identification floor for a single factor; below it a "
+            "facet can collapse into a Heywood case. Enforced by the PFA pruner "
+            "AND the post-dedup finalize guard. When facets times this floor "
+            "exceeds item_count, the floor wins and more items than item_count "
+            "are returned."
         ),
     )
 
