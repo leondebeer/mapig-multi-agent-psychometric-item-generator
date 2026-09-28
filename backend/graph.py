@@ -1330,8 +1330,28 @@ def finalize_node(state: GraphState) -> GraphState:
                 logger.warning("FINALIZE_PFA_FALLBACK failed: %s", e)
                 pfa_result_for_output = None
 
+        # Fix: drop near-duplicate items (embedding cosine > threshold) before
+        # final output. The meta-editor only catches exact-string duplicates, so
+        # near-duplicates from the item writer (esp. under overlapping facets)
+        # previously shipped straight through.
+        deduped_items = enriched_items
+        dedup_dropped: List[int] = []
+        if settings.DEDUP_ENABLED and len(enriched_items) >= 3:
+            try:
+                from backend.agents.deduplicator import deduplicate_items
+                deduped_items, dedup_dropped = deduplicate_items(
+                    enriched_items, threshold=settings.DEDUP_THRESHOLD,
+                )
+                if dedup_dropped:
+                    logger.warning(
+                        "FINALIZE_DEDUP dropped %d near-duplicate items: %s",
+                        len(dedup_dropped), dedup_dropped,
+                    )
+            except Exception as e:  # noqa: BLE001
+                logger.warning("FINALIZE_DEDUP failed: %s", e)
+
         out = FinalOutput(
-            final_items=enriched_items,
+            final_items=deduped_items,
             audit=audit,
             user_request=user_request,
             linguistic_feedback=linguistic_feedback,

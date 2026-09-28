@@ -122,8 +122,8 @@ class UserRequest(BaseModel):
 
     # Construct dimensionality
     is_unidimensional: bool = Field(
-        default=True,
-        description="User's intended construct structure. If true, items target a single construct and sub-constructs are flagged for separate runs."
+        default=False,
+        description="User's intended construct structure. Defaults to False so multi-facet constructs are NOT silently collapsed to a single pool (the old True default made the facet mapper ignore multi-facet definitions). Set True only when the construct is genuinely unidimensional."
     )
 
     # Qualitative questions (Phase 18)
@@ -313,8 +313,8 @@ class ReviewComment(BaseModel):
     issue: str = Field(
         ...,
         min_length=3,
-        max_length=210,  # ~30 words at 7 chars/word average
-        description="What is wrong and why it matters. Maximum 30 words.",
+        max_length=500,  # raised from 210: reviewers exceeded the cap and crashed validation (string_too_long)
+        description="What is wrong and why it matters. Maximum ~70 words.",
     )
     severity: conint(ge=1, le=5) = Field(
         ..., description="1=nitpick, 3=needs revision, 5=blocking"
