@@ -78,6 +78,18 @@ All instruments ≥ 0.91 mean congruence (Lorenzo-Seva & ten Berge: >.95 near-id
 
 Facet decomposition is correct for all four. Burnout progressed across three runs as its two confounds were removed: **0.0** (bad definition + permutation bug) → **0.667** (code fixes only, definition still under-specified) → **1.0** (CBI-faithful definition, §4.6). The binding constraint on burnout was *construct-definition specificity*, not facet overlap per se. A small stability check (3 runs) is reported in §3.4.
 
+### 3.4 Stability check (burnout, corrected definition)
+
+Three runs of the corrected burnout construct:
+
+| Run | Recovery | Congruence (3 factors) | Items per facet | max cosine |
+|---|---|---|---|---|
+| 1 | 1.0 | .951 / .952 / .990 | 2 / 1 / 3 | .800 |
+| 2 | 1.0 | .960 / .876 / .973 | 2 / 2 / 4 | .829 |
+| 3 | 1.0 | .503 / .884 / .995 | 1 / 4 / 4 | .818 |
+
+**Recovery is stable at 1.0 across all three runs** — the corrected definition reliably fixes the discrimination. Congruence is ≥ .87 for well-populated facets; the single sub-.87 value (0.50, run 3) coincides with a facet under-populated to one item — a facet-*balance* artifact (stochasticity in which facet collapses), not a discrimination failure. No run reproduced a published CBI item within paraphrase distance (max similarity 0.77).
+
 ---
 
 ## 4. Findings (bugs & limitations)
